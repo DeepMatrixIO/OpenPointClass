@@ -194,6 +194,66 @@ public:
     }
 };
 
+class XCoordinate : public Feature {
+public:
+    XCoordinate(Scale *s) : Feature(s) {
+        this->setName("x_coordinate");
+    };
+    virtual float getValue(size_t i) {
+        return s->pSet->points[i][0];
+    }
+};
+
+class YCoordinate : public Feature {
+public:
+    YCoordinate(Scale *s) : Feature(s) {
+        this->setName("y_coordinate");
+    };
+    virtual float getValue(size_t i) {
+        return s->pSet->points[i][1];
+    }
+};
+
+class ZCoordinate : public Feature {
+public:
+    ZCoordinate(Scale *s) : Feature(s) {
+        this->setName("z_coordinate");
+    };
+    virtual float getValue(size_t i) {
+        return s->pSet->points[i][2];
+    }
+};
+
+class RelativeXDistance : public Feature {
+public:
+    RelativeXDistance(Scale *s) : Feature(s) {
+        this->setName("relative_x_distance");
+    };
+    virtual float getValue(size_t i) {
+        return std::abs(s->pSet->points[i][0] - s->x0);
+    }
+};
+
+class RelativeYDistance : public Feature {
+public:
+    RelativeYDistance(Scale *s) : Feature(s) {
+        this->setName("relative_y_distance");
+    };
+    virtual float getValue(size_t i) {
+        return std::abs(s->pSet->points[i][1] - s->y0);
+    }
+};
+
+class RelativeZDistance : public Feature {
+public:
+    RelativeZDistance(Scale *s) : Feature(s) {
+        this->setName("relative_z_distance");
+    };
+    virtual float getValue(size_t i) {
+        return std::abs(s->pSet->points[i][2] - s->z0);
+    }
+};
+
 std::vector<Feature *> getFeatures(const std::vector<Scale *> &scales);
 
 #endif

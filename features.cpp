@@ -4,6 +4,14 @@ std::vector<Feature *> getFeatures(const std::vector<Scale *> &scales) {
     std::vector<Feature *> feats;
 
     for (size_t i = 0; i < scales.size(); i++) {
+        // Coordinates
+        feats.push_back(reinterpret_cast<Feature *>(new XCoordinate(scales[i])));
+        feats.push_back(reinterpret_cast<Feature *>(new YCoordinate(scales[i])));
+        feats.push_back(reinterpret_cast<Feature *>(new ZCoordinate(scales[i])));
+        feats.push_back(reinterpret_cast<Feature *>(new RelativeXDistance(scales[i])));
+        feats.push_back(reinterpret_cast<Feature *>(new RelativeYDistance(scales[i])));
+        feats.push_back(reinterpret_cast<Feature *>(new RelativeZDistance(scales[i])));
+
         // Covariance
         feats.push_back(reinterpret_cast<Feature *>(new Omnivariance(scales[i])));
         feats.push_back(reinterpret_cast<Feature *>(new Eigenentropy(scales[i])));
@@ -31,7 +39,6 @@ std::vector<Feature *> getFeatures(const std::vector<Scale *> &scales) {
             feats.push_back(reinterpret_cast<Feature *>(new NeighborhoodColors(scales[0], c)));
         }
     }
-
 
     return feats;
 }

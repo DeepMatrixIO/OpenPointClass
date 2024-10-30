@@ -2,7 +2,21 @@
 
 Scale::Scale(const size_t id, PointSet *pSet, const double resolution, const int kNeighbors, const double radius) :
     id(id), pSet(pSet), scaledSet(new PointSet()), resolution(resolution), kNeighbors(kNeighbors), radius(radius) {
+    if (pSet && !pSet->points.empty()) {
+        x0 = pSet->points[0][0];
+        y0 = pSet->points[0][1];
+        z0 = pSet->points[0][2];
+        scaleCoordinates = {x0, y0, z0};
+    }
+}
 
+void Scale::updateScaleCoordinates() {
+    if (scaledSet && !scaledSet->points.empty()) {
+        x0 = scaledSet->points[0][0];
+        y0 = scaledSet->points[0][1];
+        z0 = scaledSet->points[0][2];
+        scaleCoordinates = {x0, y0, z0};
+    }
 }
 
 void Scale::init() {
@@ -26,6 +40,7 @@ void Scale::init() {
     }
 
     computeScaledSet();
+    updateScaleCoordinates();
 }
 
 void Scale::build() {
@@ -54,13 +69,13 @@ void Scale::build() {
             eigenValues[idx] = (ev / sum).cast<float>(); // sum-normalized
             eigenVectors[idx] = solver.eigenvectors().cast<float>();
 
-            // std::cout <<  "==Covariance==" << std::endl << 
+            // std::cout <<  "==Covariance==" << std::endl <<
             //     covariance << std::endl;
-            // std::cout  << "==Medoid==" << std::endl << 
+            // std::cout  << "==Medoid==" << std::endl <<
             //     medoid << std::endl;
-            // std::cout <<  "==Eigenvalues==" << std::endl << 
+            // std::cout <<  "==Eigenvalues==" << std::endl <<
             //     eigenValues[idx] << std::endl;
-            // std::cout <<  "==Eigenvectors==" << std::endl << 
+            // std::cout <<  "==Eigenvectors==" << std::endl <<
             //     eigenVectors[idx] << std::endl;
             // exit(1);
 
@@ -295,15 +310,14 @@ std::vector<Scale *> computeScales(size_t numScales, PointSet *pSet, double star
 
     auto *base = new Scale(0, pSet, startResolution * std::pow<double>(2.0, 0), 10, radius);
     base->init();
-    // base->save("base.ply");
     pSet->base = base->scaledSet;
 
     for (size_t i = 0; i < numScales; i++) {
         scales[i] = new Scale(i + 1, base->scaledSet, startResolution * std::pow<double>(2.0, i), 10, radius);
     }
 
-    // Save some time on the first scale
     scales[0]->scaledSet = base->scaledSet;
+    scales[0]->updateScaleCoordinates();
 
     #pragma omp parallel for
     for (int i = 0; i < numScales; i++) {
@@ -312,8 +326,16 @@ std::vector<Scale *> computeScales(size_t numScales, PointSet *pSet, double star
 
     for (int i = 0; i < numScales; i++) {
         scales[i]->build();
-        // scales[i]->save("scale_" + std::to_string(i + 1) + ".ply");
+
+        #pragma omp critical
+        {
+            std::cout << "Scale " << i + 1 << " coordinates: "
+                     << "x=" << scales[i]->x0
+                     << ", y=" << scales[i]->y0
+                     << ", z=" << scales[i]->z0 << std::endl;
+        }
     }
 
     return scales;
 }
+
